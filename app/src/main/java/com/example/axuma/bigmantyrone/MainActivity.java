@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         protected void onPostExecute(String result) {
-            // check that the background communication with the client was succesfull
+            // check that the background communication with the client was successfull
             if (result.equals("OK")) {
                 // now the coordinates variable has those coordinates
                 // elements of these coordinates is the Location object who has
@@ -199,14 +199,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Location loc = coordinates.get(i);
                     bmtlong[i] = loc.getLongitude();
                 }
-                for (int i = 0; i < bmtlat.length - 1; i++) {          //instead of coordinates.size we use bmtlat.length
-                    bmtdist[i] =
+                for (int i = 0; i < bmtlat.length - 1; i++) { //instead of coordinates.size we use bmtlat.length
+                    bmtdist[i] = //plane approximation formula to get the distance between two points
                             Math.sqrt( Math.pow((40075d/360d)*(bmtlat[i+1]-bmtlat[i]),2d)
                                     + Math.pow((40075d/360d)*Math.cos(bmtlat[i])*(bmtlong[i+1]-bmtlong[i]),2d));
                 }
-                for (int i = 0; i < bmtdist.length -1 ; i++){
-                    totaldist = totaldist + bmtdist[i];
+                for (int i = 0; i < bmtdist.length ; i++){
+                    //get rid of the cases where the value would mess up the totaldist calculation by adding 0
+                   if(bmtlat[i]!=0 && bmtlat[i+1]!=0 && bmtlong[i]!=0 && bmtlong[i+1]!=0){
+                        totaldist = totaldist + bmtdist[i]; //calculate the totaldist to display to the user
+                    }
                 }
+                //show the total distance in the textview
                 TextView distance = (TextView)findViewById(R.id.distance);
                 distance.setText(totaldist.toString());
 
