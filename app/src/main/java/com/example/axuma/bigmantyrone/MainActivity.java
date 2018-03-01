@@ -48,7 +48,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String               username, password;
     private String[]             positions = new String[MAXPOSITIONS];
+    private Double[]             bmtlat = new Double[MAXPOSITIONS];    //bmt approved
+    private Double[]             bmtlong = new Double[MAXPOSITIONS]; //bmt approved insert
+    private Double[]             bmtdist = new Double[MAXPOSITIONS - 1]; //bmt approved
     private ArrayAdapter<String> myAdapter;
+    private Double               totaldist = 0d;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +63,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // initialize the array so that every position has an object (even it is empty string)
         for (int i = 0; i < positions.length; i++)
             positions[i] = "";
+
+        // BMT- initialize new array with just long and lat so every position has object (justincase)
+        for (int i = 0; i < bmtlat.length; i++)
+            bmtlat[i] = 0d;
+        for (int i = 0; i < bmtlong.length; i++)
+            bmtlong[i] = 0d;
+        for (int i = 0; i < bmtdist.length; i++)
+            bmtdist[i] = 0d;
 
         // setup the adapter for the array
         myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, positions);
@@ -175,16 +188,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Location loc = coordinates.get(i);
 
                     positions[i] = (new Date(loc.getTime())) +
-                                   " (" + loc.getLatitude() + "," +
-                                   loc.getLongitude() + ")"; //coordinates.get(i).toString();
+                            " (" + loc.getLatitude() + "," +
+                            loc.getLongitude() + ")"; //coordinates.get(i).toString();
                 }
-            } else {
-                // no, tell that to the user and ask a new username/password pair
-                positions[0] = getResources().getString(R.string.no_connection);
-                queryDialog(MainActivity.this, getResources().getString(R.string.info_prompt));
+                for (int i = 0; i < coordinates.size(); i++) {
+                    Location loc = coordinates.get(i);
+                    bmtlat[i] = loc.getLatitude();
+                }
+                for (int i = 0; i < coordinates.size(); i++) {
+                    Location loc = coordinates.get(i);
+                    bmtlong[i] = loc.getLongitude();
+                }
+                for (int i = 0; i < bmtlat.length - 1; i++) {          //instead of coordinates.size we use bmtlat.length
+                    bmtdist[i] =
+                            Math.sqrt( Math.pow((40075d/360d)*(bmtlat[i+1]-bmtlat[i]),2d)
+                                    + Math.pow((40075d/360d)*Math.cos(bmtlat[i])*(bmtlong[i+1]-bmtlong[i]),2d));
+                }
+                for (int i = 0; i < bmtdist.length -1 ; i++){
+                    totaldist = totaldist + bmtdist[i];
+                }
+                TextView distance = (TextView)findViewById(R.id.distance);
+                distance.setText(totaldist.toString());
+
+            }else{
+                    // no, tell that to the user and ask a new username/password pair
+                    positions[0] = getResources().getString(R.string.no_connection);
+                    queryDialog(MainActivity.this, getResources().getString(R.string.info_prompt));
+                }
+                myAdapter.notifyDataSetChanged();
             }
-            myAdapter.notifyDataSetChanged();
-        }
 
         @Override
         protected void onPreExecute() {

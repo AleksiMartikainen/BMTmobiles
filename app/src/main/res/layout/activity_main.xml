@@ -11,11 +11,19 @@
     android:orientation="vertical"
     tools:context="com.example.axuma.bigmantyrone.MainActivity">
 
+    <EditText
+        android:id="@+id/distance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Distance:" />
+
     <Button
+        android:id="@+id/mybutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:id="@+id/mybutton"
         android:text="Request data from the ThingseeONE" />
 
     <ListView
