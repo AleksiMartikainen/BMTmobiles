@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -54,11 +55,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayAdapter<String> myAdapter;
     private Double               totaldist = 0d;
 
+    private Button b1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        b1 = (Button)findViewById(R.id.buttonMap);
+        b1.setOnClickListener(this);
 
         // initialize the array so that every position has an object (even it is empty string)
         for (int i = 0; i < positions.length; i++)
@@ -141,11 +147,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 }
 
     public void onClick(View v) {
-        Log.d("USR", "Button pressed");
 
-        // we make the request to the Thingsee cloud server in backgroud
-        // (AsyncTask) so that we don't block the UI (to prevent ANR state, Android Not Responding)
-        new TalkToThingsee().execute("QueryState");
+        switch (v.getId()) {
+            case R.id.buttonMap:
+                Intent myIntent = new Intent(this, MapsMarkerActivity.class);
+                startActivity(myIntent);
+
+            case R.id.mybutton:
+                Log.d("USR", "Button pressed");
+
+                // we make the request to the Thingsee cloud server in backgroud
+                // (AsyncTask) so that we don't block the UI (to prevent ANR state, Android Not Responding)
+                new TalkToThingsee().execute("QueryState");
+        }
+
     }
 
     /* This class communicates with the ThingSee client on a separate thread (background processing)
