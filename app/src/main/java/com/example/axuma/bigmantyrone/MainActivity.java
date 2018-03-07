@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 
@@ -272,10 +274,20 @@ public class MainActivity extends AppCompatActivity
             // Add a marker in Sydney, Australia,
             // and move the map's camera to the same location.
             LatLng start = new LatLng(bmtlat[0], bmtlong[0]);
+            LatLng end = new LatLng(bmtlat[bmtlat.length - 1], bmtlong[bmtlong.length - 1]);
 
-            googleMap.addMarker(new MarkerOptions().position(start)
-                    .title("Marker in Sydney"));
+
+            googleMap.addMarker(new MarkerOptions().position(start));
+            googleMap.addMarker(new MarkerOptions().position(end));
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(start));
+
+            ArrayList<LatLng> BMTmaplist = new ArrayList<LatLng>();
+            for (int i=0; i<MAXPOSITIONS-1; i++){
+                BMTmaplist.add(new LatLng(bmtlat[i], bmtlong[i]));
+            }
+
+            PolylineOptions line = new PolylineOptions().addAll(BMTmaplist).width(8).color(Color.RED);
+            googleMap.addPolyline(line);
         }
     }
 
