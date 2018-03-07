@@ -1,19 +1,3 @@
-/*
- * MainActivity.java -- Simple demo application for the Thingsee cloud server agent
- *
- * Request 20 latest position measurements and displays them on the
- * listview wigdet.
- *
- * Note: you need to insert the following line before application -tag in
- * the AndroidManifest.xml file
- *  <uses-permission android:name="android.permission.INTERNET" />
- *
- * Author(s): Jarkko Vuori
- * Modification(s):
- *   First version created on 04.02.2017
- *   Clears the positions array before button pressed 15.02.2017
- *   Stores username and password to SharedPreferences 17.02.2017
- */
 package com.example.axuma.bigmantyrone;
 
 import android.app.Activity;
@@ -24,8 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +19,13 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.axuma.bigmantyrone.R;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 
@@ -43,31 +33,31 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final int    MAXPOSITIONS = 20;
+/**
+ * An activity that displays a Google map with a marker (pin) to indicate a particular location.
+ */
+public class MainActivity extends AppCompatActivity
+        implements OnMapReadyCallback, View.OnClickListener {
+
+    private static final int MAXPOSITIONS = 20;
     private static final String PREFERENCEID = "Credentials";
 
-    private String               username, password;
-    private String[]             positions = new String[MAXPOSITIONS];
-    private Double[]             bmtlat = new Double[MAXPOSITIONS];    //bmt approved
-    private Double[]             bmtlong = new Double[MAXPOSITIONS]; //bmt approved insert
-    private Double[]             bmtdist = new Double[MAXPOSITIONS - 1]; //bmt approved
+    private String username, password;
+    private String[] positions = new String[MAXPOSITIONS];
+    private Double[] bmtlat = new Double[MAXPOSITIONS];    //bmt approved
+    private Double[] bmtlong = new Double[MAXPOSITIONS]; //bmt approved insert
+    private Double[] bmtdist = new Double[MAXPOSITIONS - 1]; //bmt approved
     private ArrayAdapter<String> myAdapter;
-    private Double               totaldist = 0d;
+    private Double totaldist = 0d;
     private Double finaldist = 0d;
 
-    private Button b1;
-
+    private Button Back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        /*
-        b1 = (Button)findViewById(R.id.buttonMap);
-        b1.setOnClickListener(this); */
-
+        // Retrieve the content view that renders the map.
+        setContentView(R.layout.activity_maps);
 
         // initialize the array so that every position has an object (even it is empty string)
         for (int i = 0; i < positions.length; i++)
@@ -85,11 +75,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, positions);
 
         // then connect it to the list in application's layout
-        ListView listView = (ListView) findViewById(R.id.mylist);
-        listView.setAdapter(myAdapter);
+        //ListView listView = (ListView) findViewById(R.id.mylist);
+        //listView.setAdapter(myAdapter);
 
         // setup the button event listener to receive onClick events
-        ((Button)findViewById(R.id.mybutton)).setOnClickListener(this);
+        ((Button) findViewById(R.id.mybutton)).setOnClickListener(this);
 
         // check that we know username and password for the Thingsee cloud
         SharedPreferences prefGet = getSharedPreferences(PREFERENCEID, Activity.MODE_PRIVATE);
@@ -110,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // set prompts.xml to alertdialog builder
         alertDialogBuilder.setView(promptsView);
 
-        final TextView dialogMsg      = (TextView) promptsView.findViewById(R.id.textViewDialogMsg);
+        final TextView dialogMsg = (TextView) promptsView.findViewById(R.id.textViewDialogMsg);
         final EditText dialogUsername = (EditText) promptsView.findViewById(R.id.editTextDialogUsername);
         final EditText dialogPassword = (EditText) promptsView.findViewById(R.id.editTextDialogPassword);
 
@@ -123,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setCancelable(false)
                 .setPositiveButton("OK",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 username = dialogUsername.getText().toString();
                                 password = dialogPassword.getText().toString();
@@ -137,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         })
                 .setNegativeButton("Cancel",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
                         });
@@ -147,30 +137,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // show it
         alertDialog.show();
-}
+    }
 
     public void onClick(View v) {
-
         switch (v.getId()) {
-            case R.id.buttonMap:
-                Intent myIntent = new Intent(this, MapsMarkerActivity.class);
-                startActivity(myIntent);
 
             case R.id.mybutton:
                 Log.d("USR", "Button pressed");
 
                 // we make the request to the Thingsee cloud server in backgroud
                 // (AsyncTask) so that we don't block the UI (to prevent ANR state, Android Not Responding)
-                new TalkToThingsee().execute("QueryState");
-        }
+                new MainActivity.TalkToThingsee().execute("QueryState");
 
+                // Get the SupportMapFragment and request notification
+                // when the map is ready to be used.
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.map);
+                mapFragment.getMapAsync(this);
+
+                if (totaldist != 0d){ //set totaldist to be zero at every press so calculation is accurate
+                    totaldist = 0d;
+                }
+
+        }
     }
+
+
 
     /* This class communicates with the ThingSee client on a separate thread (background processing)
      * so that it does not slow down the user interface (UI)
      */
     private class TalkToThingsee extends AsyncTask<String, Integer, String> {
-        ThingSee       thingsee;
+        ThingSee thingsee;
         List<Location> coordinates = new ArrayList<Location>();
 
         @Override
@@ -188,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                for (Location coordinate: coordinates)
 //                    System.out.println(coordinate);
                 result = "OK";
-            } catch(Exception e) {
+            } catch (Exception e) {
                 Log.d("NET", "Communication error: " + e.getMessage());
             }
 
@@ -219,27 +217,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 for (int i = 0; i < bmtlat.length - 1; i++) { //instead of coordinates.size we use bmtlat.length
                     bmtdist[i] = //plane approximation formula to get the distance between two points
-                            Math.sqrt( Math.pow((40075d/360d)*(bmtlat[i+1]-bmtlat[i]),2d)
-                                    + Math.pow((40075d/360d)*Math.cos(bmtlat[i])*(bmtlong[i+1]-bmtlong[i]),2d));
+                            Math.sqrt(Math.pow((40075d / 360d) * (bmtlat[i + 1] - bmtlat[i]), 2d)
+                                    + Math.pow((40075d / 360d) * Math.cos(bmtlat[i]) * (bmtlong[i + 1] - bmtlong[i]), 2d));
                 }
-                for (int i = 0; i < bmtdist.length ; i++){
+                for (int i = 0; i < bmtdist.length; i++) {
                     //get rid of the cases where the value would mess up the totaldist calculation by adding 0
-                   if(bmtlat[i]!=0 && bmtlat[i+1]!=0 && bmtlong[i]!=0 && bmtlong[i+1]!=0){
+                    if (bmtlat[i] != 0 && bmtlat[i + 1] != 0 && bmtlong[i] != 0 && bmtlong[i + 1] != 0) {
                         totaldist = totaldist + bmtdist[i]; //calculate the totaldist to display to the user
-                        finaldist = (double) Math.round(totaldist * 1000) / 1000;
+                        finaldist = (double) Math.round(totaldist * 1000) / 1000 ;
                     }
                 }
                 //show the total distance in the textview
-                TextView distance = (TextView)findViewById(R.id.distance);
+                TextView distance = (TextView) findViewById(R.id.distance);
                 distance.setText(finaldist.toString() + " km");
 
-            }else{
-                    // no, tell that to the user and ask a new username/password pair
-                    positions[0] = getResources().getString(R.string.no_connection);
-                    queryDialog(MainActivity.this, getResources().getString(R.string.info_prompt));
-                }
-                myAdapter.notifyDataSetChanged();
+
+
+
+            } else {
+                // no, tell that to the user and ask a new username/password pair
+                positions[0] = getResources().getString(R.string.no_connection);
+                queryDialog(MainActivity.this, getResources().getString(R.string.info_prompt));
             }
+            myAdapter.notifyDataSetChanged();
+        }
 
         @Override
         protected void onPreExecute() {
@@ -250,6 +251,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {}
+        protected void onProgressUpdate(Integer... values) {
+        }
     }
+
+    /**
+     * Manipulates the map when it's available.
+     * The API invokes this callback when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user receives a prompt to install
+     * Play services inside the SupportMapFragment. The API invokes this method after the user has
+     * installed Google Play services and returned to the app.
+     */
+
+    public void onMapReady(GoogleMap googleMap) {
+
+
+        if (bmtlat[0] != 0 && bmtlong[0] != 0) {
+            // Add a marker in Sydney, Australia,
+            // and move the map's camera to the same location.
+            LatLng start = new LatLng(bmtlat[0], bmtlong[0]);
+
+            googleMap.addMarker(new MarkerOptions().position(start)
+                    .title("Marker in Sydney"));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(start));
+        }
+    }
+
+
 }

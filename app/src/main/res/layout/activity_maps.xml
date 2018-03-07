@@ -43,8 +43,8 @@ tools:context="com.example.axuma.bigmantyrone.MainActivity">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:text="Back"
-        android:id="@+id/ButtonBack"
+        android:text="Fetch Data"
+        android:id="@+id/mybutton"
         />
     </RelativeLayout>
 
