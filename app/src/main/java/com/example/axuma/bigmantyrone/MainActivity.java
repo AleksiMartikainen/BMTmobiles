@@ -27,6 +27,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
@@ -41,7 +42,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements OnMapReadyCallback, View.OnClickListener {
 
-    private static final int MAXPOSITIONS = 20;
+    private static final int MAXPOSITIONS = 40;
     private static final String PREFERENCEID = "Credentials";
 
     private String username, password;
@@ -161,10 +162,10 @@ public class MainActivity extends AppCompatActivity
                     totaldist = 0d;
                 }
 
+
+
         }
     }
-
-
 
     /* This class communicates with the ThingSee client on a separate thread (background processing)
      * so that it does not slow down the user interface (UI)
@@ -225,16 +226,15 @@ public class MainActivity extends AppCompatActivity
                 for (int i = 0; i < bmtdist.length; i++) {
                     //get rid of the cases where the value would mess up the totaldist calculation by adding 0
                     if (bmtlat[i] != 0 && bmtlat[i + 1] != 0 && bmtlong[i] != 0 && bmtlong[i + 1] != 0) {
-                        totaldist = totaldist + bmtdist[i]; //calculate the totaldist to display to the user
+                        //calculate the totaldist
+                        totaldist = totaldist + bmtdist[i];
+                        //round the totaldist to 3 decimals to show km at meter accuracy
                         finaldist = (double) Math.round(totaldist * 1000) / 1000 ;
                     }
                 }
                 //show the total distance in the textview
                 TextView distance = (TextView) findViewById(R.id.distance);
-                distance.setText(finaldist.toString() + " km");
-
-
-
+                distance.setText("Distance: " + finaldist + "km");
 
             } else {
                 // no, tell that to the user and ask a new username/password pair
@@ -270,24 +270,32 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
 
 
-        if (bmtlat[0] != 0 && bmtlong[0] != 0) {
-            // Add a marker in Sydney, Australia,
-            // and move the map's camera to the same location.
-            LatLng start = new LatLng(bmtlat[0], bmtlong[0]);
-            LatLng end = new LatLng(bmtlat[bmtlat.length - 1], bmtlong[bmtlong.length - 1]);
-
-
-            googleMap.addMarker(new MarkerOptions().position(start));
-            googleMap.addMarker(new MarkerOptions().position(end));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(start));
-
+        if (bmtlat[0] != 0 && bmtlong[0] != 0) //set these as invalid values to avoid marking position 0,0 on run
+        {
+            //Make arraylist that contains the lat and long values in order to draw a line and set the markers
             ArrayList<LatLng> BMTmaplist = new ArrayList<LatLng>();
             for (int i=0; i<MAXPOSITIONS-1; i++){
                 BMTmaplist.add(new LatLng(bmtlat[i], bmtlong[i]));
             }
+            //set a end and start marker based on the arraylist
+            LatLng end = BMTmaplist.get(0);
+            LatLng start = BMTmaplist.get(BMTmaplist.size()-1);
 
+            //Clear all previous entries
+            googleMap.clear();
+            //Add markers at end and start with titles
+            googleMap.addMarker(new MarkerOptions().position(start)).setTitle("Start"); ;
+            googleMap.addMarker(new MarkerOptions().position(end)).setTitle("End");
+            //Default zoom level of the map
+            googleMap.moveCamera(CameraUpdateFactory.zoomTo(15));
+            //Center map on start coordinates
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(start));
+
+            //Draws a line between all the points found in BMTmaplist array and adds it to the map
             PolylineOptions line = new PolylineOptions().addAll(BMTmaplist).width(8).color(Color.RED);
             googleMap.addPolyline(line);
+
+
         }
     }
 

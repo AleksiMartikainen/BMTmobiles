@@ -20,13 +20,15 @@ tools:context="com.example.axuma.bigmantyrone.MainActivity">
         android:layout_weight="1"
          />
 
-<EditText
+<TextView
     android:id="@+id/distance"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:ems="10"
     android:inputType="textPersonName"
-    android:text="Distance:" />
+    android:text="Distance:"
+    android:textSize="20dp"
+    android:textColor="#000000"/>
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -47,5 +49,10 @@ tools:context="com.example.axuma.bigmantyrone.MainActivity">
         android:id="@+id/mybutton"
         />
     </RelativeLayout>
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mylist" />
 
 </LinearLayout>
