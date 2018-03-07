@@ -1,7 +1,12 @@
 package com.example.axuma.bigmantyrone;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+
 
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -15,7 +20,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * An activity that displays a Google map with a marker (pin) to indicate a particular location.
  */
 public class MapsMarkerActivity extends AppCompatActivity
-        implements OnMapReadyCallback {
+        implements OnMapReadyCallback, View.OnClickListener {
+
+    
+
+    private Button Back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +36,9 @@ public class MapsMarkerActivity extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Back = (Button)findViewById(R.id.ButtonBack);
+        Back.setOnClickListener(this);
     }
 
     /**
@@ -42,9 +54,20 @@ public class MapsMarkerActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         // Add a marker in Sydney, Australia,
         // and move the map's camera to the same location.
-        LatLng sydney = new LatLng(60.2, 42);
-        googleMap.addMarker(new MarkerOptions().position(sydney)
+        LatLng start = new LatLng(60.2, 42);
+        googleMap.addMarker(new MarkerOptions().position(start)
                 .title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(start));
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.ButtonBack:
+                Intent myIntent = new Intent(this, MainActivity.class);
+                startActivity(myIntent);
+
+            case R.id.ButtonSave:
+
+        }
     }
 }

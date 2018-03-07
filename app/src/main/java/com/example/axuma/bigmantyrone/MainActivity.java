@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Double[]             bmtdist = new Double[MAXPOSITIONS - 1]; //bmt approved
     private ArrayAdapter<String> myAdapter;
     private Double               totaldist = 0d;
+    private Double finaldist = 0d;
 
     private Button b1;
 
@@ -63,8 +64,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /*
         b1 = (Button)findViewById(R.id.buttonMap);
-        b1.setOnClickListener(this);
+        b1.setOnClickListener(this); */
+
 
         // initialize the array so that every position has an object (even it is empty string)
         for (int i = 0; i < positions.length; i++)
@@ -223,11 +226,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //get rid of the cases where the value would mess up the totaldist calculation by adding 0
                    if(bmtlat[i]!=0 && bmtlat[i+1]!=0 && bmtlong[i]!=0 && bmtlong[i+1]!=0){
                         totaldist = totaldist + bmtdist[i]; //calculate the totaldist to display to the user
+                        finaldist = (double) Math.round(totaldist * 1000) / 1000;
                     }
                 }
                 //show the total distance in the textview
                 TextView distance = (TextView)findViewById(R.id.distance);
-                distance.setText(totaldist.toString());
+                distance.setText(finaldist.toString() + " km");
 
             }else{
                     // no, tell that to the user and ask a new username/password pair
