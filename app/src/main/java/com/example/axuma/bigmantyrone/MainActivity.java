@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -245,10 +246,30 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 //show the total distance in the textview
-                TextView distance = (TextView) findViewById(R.id.distance);
-                //distance.setText("Distance: " + finaldist + "km");
-                String temp = new String("Dis: " + finaldist + "km" + " Tim: " + Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)));
-                distance.setText(temp);
+                TextView distanceV = (TextView) findViewById(R.id.distance);
+                TextView timetakenV = (TextView) findViewById(R.id.timetaken);
+                TextView averagespeedV = (TextView) findViewById(R.id.averagespeed);
+
+                String seconds = new String(Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)));
+                Double roundnumber = new Double(finaldist/(Double.parseDouble(seconds)/3600));
+
+
+                String superfinaldistance = new String("Distance: " + finaldist + "km" );
+                String timetaken = new String ("Time: " + Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)/60) + "m " +
+                        (Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)%60) + "s"));
+
+
+                String finalaveragespeed = new String("Avg. Speed: " + (double)Math.round(roundnumber*10)/10 + "km/h");
+
+                Log.d("roudnnumeer", roundnumber.toString());
+                Log.d("averagespseed)", finalaveragespeed.toString());
+                Log.d("test", seconds.toString());
+                //Log.d("doubleparse", Double.parseDouble(seconds));
+
+
+                distanceV.setText(superfinaldistance);
+                timetakenV.setText(timetaken);
+                averagespeedV.setText(finalaveragespeed);
             } else {
                 // no, tell that to the user and ask a new username/password pair
                 positions[0] = getResources().getString(R.string.no_connection);

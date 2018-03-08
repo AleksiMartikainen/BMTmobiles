@@ -17,46 +17,57 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        />
-
-    <TextView
-        android:id="@+id/distance"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Distance:"
-        android:textColor="#000000"
-        android:textSize="20dp" />
+        android:layout_weight="1" />
 
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/ButtonSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:text="Save" />
 
-        <Button
-            android:id="@+id/ButtonLoad"
+        <TextView
+            android:id="@+id/distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/ButtonSave"
-            android:text="Load" />
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Distance:"
+            android:textColor="#000000"
+            android:textSize="22dp" />
+
+        <TextView
+            android:id="@+id/timetaken"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/distance"
+            android:layout_below="@+id/distance"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Time:"
+            android:textColor="#000000"
+            android:textSize="22dp" />
+
+        <TextView
+            android:id="@+id/averagespeed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/timetaken"
+            android:layout_below="@+id/timetaken"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Avg. Speed:"
+            android:textColor="#000000"
+            android:textSize="22dp" />
 
         <Button
             android:id="@+id/ButtonDraw"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toStartOf="@+id/mybutton"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/mybutton"
             android:text="Map" />
 
         <Button
@@ -66,6 +77,7 @@
             android:layout_alignParentTop="true"
             android:text="Fetch"
             android:id="@+id/mybutton" />
+
     </RelativeLayout>
 
 </LinearLayout>
