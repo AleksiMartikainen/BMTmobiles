@@ -36,11 +36,12 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity
         implements OnMapReadyCallback, View.OnClickListener {
 
-    private static final int MAXPOSITIONS = 30;
+    private static final int MAXPOSITIONS = 60;
     private static final String PREFERENCEID = "Credentials";
 
     private String username, password;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity
     private Double[] bmtlat = new Double[MAXPOSITIONS];    //bmt approved
     private Double[] bmtlong = new Double[MAXPOSITIONS]; //bmt approved insert
     private Double[] bmtdist = new Double[MAXPOSITIONS - 1]; //bmt approved
+    private Date[] bmttime = new Date[MAXPOSITIONS]; //bmt approved
     private ArrayAdapter<String> myAdapter;
     private Double totaldist = 0d;
     private Double finaldist = 0d;
@@ -71,6 +73,9 @@ public class MainActivity extends AppCompatActivity
             bmtlong[i] = 0d;
         for (int i = 0; i < bmtdist.length; i++)
             bmtdist[i] = 0d;
+        for (int i = 0; i < bmttime.length; i++)
+            bmttime[i] = null;
+
 
         // setup the adapter for the array
         myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, positions);
@@ -231,9 +236,20 @@ public class MainActivity extends AppCompatActivity
                         finaldist = (double) Math.round(totaldist * 1000) / 1000 ;
                     }
                 }
+                for (int i = 0; i < bmtlat.length; i++){
+                    Location loc = coordinates.get(i);
+                    bmttime[i] = new Date(loc.getTime());
+                }
+
                 //show the total distance in the textview
                 TextView distance = (TextView) findViewById(R.id.distance);
-                distance.setText("Distance: " + finaldist + "km");
+                //distance.setText("Distance: " + finaldist + "km");
+                distance.setText(Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)));
+                Log.d("0", bmttime[0].toString());
+                //Log.d("length", bmttime[bmttime.length].toString());
+                Log.d("length-1",bmttime[bmttime.length-1].toString());
+
+
 
             } else {
                 // no, tell that to the user and ask a new username/password pair
@@ -295,6 +311,10 @@ public class MainActivity extends AppCompatActivity
 
 
         }
+    }
+    public static long getDateDiff(Date d1, Date d2, TimeUnit timeUnit) {
+        long diffInMillies = d2.getTime() - d1.getTime();
+        return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
     }
 
 
