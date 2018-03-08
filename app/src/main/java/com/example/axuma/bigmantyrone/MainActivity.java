@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,13 +37,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * An activity that displays a Google map with a marker (pin) to indicate a particular location.
- */
 public class MainActivity extends AppCompatActivity
         implements OnMapReadyCallback, View.OnClickListener {
 
-    private static final int MAXPOSITIONS = 40;
+    private static final int MAXPOSITIONS = 30;
     private static final String PREFERENCEID = "Credentials";
 
     private String username, password;
@@ -54,13 +52,13 @@ public class MainActivity extends AppCompatActivity
     private Double totaldist = 0d;
     private Double finaldist = 0d;
 
-    private Button Back;
+    private Button myButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Retrieve the content view that renders the map.
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_main);
 
         // initialize the array so that every position has an object (even it is empty string)
         for (int i = 0; i < positions.length; i++)
@@ -82,13 +80,15 @@ public class MainActivity extends AppCompatActivity
         //listView.setAdapter(myAdapter);
 
         // setup the button event listener to receive onClick events
-        ((Button) findViewById(R.id.mybutton)).setOnClickListener(this);
+        myButton = (Button) findViewById(R.id.mybutton);
+        myButton.setOnClickListener(this);
+        ((Button) findViewById(R.id.ButtonDraw)).setOnClickListener(this);
 
         // check that we know username and password for the Thingsee cloud
         SharedPreferences prefGet = getSharedPreferences(PREFERENCEID, Activity.MODE_PRIVATE);
         username = prefGet.getString("username", "");
         password = prefGet.getString("password", "");
-        if (username.length() == 0 || password.length() == 0)
+        if ((username.length() == 0 || password.length() == 0) && myButton.isPressed())
             // no, ask them from the user
             queryDialog(this, getResources().getString(R.string.prompt));
     }
@@ -145,6 +145,14 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
 
+            case R.id.ButtonDraw:
+                // Get the SupportMapFragment and request notification
+                // when the map is ready to be used.
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.map);
+                mapFragment.getMapAsync(this);
+                break;
+
             case R.id.mybutton:
                 Log.d("USR", "Button pressed");
 
@@ -152,18 +160,9 @@ public class MainActivity extends AppCompatActivity
                 // (AsyncTask) so that we don't block the UI (to prevent ANR state, Android Not Responding)
                 new MainActivity.TalkToThingsee().execute("QueryState");
 
-                // Get the SupportMapFragment and request notification
-                // when the map is ready to be used.
-                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                        .findFragmentById(R.id.map);
-                mapFragment.getMapAsync(this);
-
                 if (totaldist != 0d){ //set totaldist to be zero at every press so calculation is accurate
                     totaldist = 0d;
                 }
-
-
-
         }
     }
 
@@ -268,7 +267,6 @@ public class MainActivity extends AppCompatActivity
      */
 
     public void onMapReady(GoogleMap googleMap) {
-
 
         if (bmtlat[0] != 0 && bmtlong[0] != 0) //set these as invalid values to avoid marking position 0,0 on run
         {
