@@ -51,11 +51,9 @@ public class MainActivity extends AppCompatActivity
     private Double[] bmtlong = new Double[MAXPOSITIONS]; //bmt approved insert
     private Double[] bmtdist = new Double[MAXPOSITIONS - 1]; //bmt approved
     private Date[] bmttime = new Date[MAXPOSITIONS]; //bmt approved
-    private ArrayAdapter<String> myAdapter;
+    //private ArrayAdapter<String> myAdapter;
     private Double totaldist = 0d;
     private Double finaldist = 0d;
-    private Double x = 0d;
-    private Double y = 0d;
 
     private Button myButton;
 
@@ -81,21 +79,23 @@ public class MainActivity extends AppCompatActivity
 
 
         // setup the adapter for the array
-        myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, positions);
+        //myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, positions);
 
         // then connect it to the list in application's layout
         //ListView listView = (ListView) findViewById(R.id.mylist);
         //listView.setAdapter(myAdapter);
 
         // setup the button event listener to receive onClick events
-        myButton = (Button) findViewById(R.id.mybutton);
+        myButton = (Button) findViewById(R.id.mybutton); //fetch button
         myButton.setOnClickListener(this);
-        ((Button) findViewById(R.id.ButtonDraw)).setOnClickListener(this);
+        ((Button) findViewById(R.id.ButtonDraw)).setOnClickListener(this); //map button
 
         // check that we know username and password for the Thingsee cloud
         SharedPreferences prefGet = getSharedPreferences(PREFERENCEID, Activity.MODE_PRIVATE);
         username = prefGet.getString("username", "");
         password = prefGet.getString("password", "");
+
+        //check if button is correct one to avoid query popping up when pressing other button
         if ((username.length() == 0 || password.length() == 0) && myButton.isPressed())
             // no, ask them from the user
             queryDialog(this, getResources().getString(R.string.prompt));
@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
 
-            case R.id.ButtonDraw:
+            case R.id.ButtonDraw: //map button
                 // Get the SupportMapFragment and request notification
                 // when the map is ready to be used.
                 SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity
                 mapFragment.getMapAsync(this);
                 break;
 
-            case R.id.mybutton:
+            case R.id.mybutton: //fetch button
                 Log.d("USR", "Button pressed");
 
                 // we make the request to the Thingsee cloud server in backgroud
@@ -217,56 +217,60 @@ public class MainActivity extends AppCompatActivity
                             " (" + loc.getLatitude() + "," +
                             loc.getLongitude() + ")"; //coordinates.get(i).toString();
                 }
+                //make array that contains latitude values
                 for (int i = 0; i < coordinates.size(); i++) {
                     Location loc = coordinates.get(i);
                     bmtlat[i] = loc.getLatitude();
                 }
+                //make array that contains longitude values
                 for (int i = 0; i < coordinates.size(); i++) {
                     Location loc = coordinates.get(i);
                     bmtlong[i] = loc.getLongitude();
                 }
+                //array that contains distances between the lat and lon values
                 for (int i = 0; i < bmtlat.length - 1; i++) { //instead of coordinates.size we use bmtlat.length
                     bmtdist[i] = //plane approximation formula to get the distance between two points
                             Math.sqrt(Math.pow((40075d / 360d) * (bmtlat[i +1] - bmtlat[i]), 2d)
                                     + Math.pow(((40075d * Math.cos(Math.toDegrees(bmtlat[i])))/360) * (bmtlong[i+1] - bmtlong[i]), 2d));
                 }
+                //add bmtdist values together in a loop
                 for (int i = 0; i < bmtdist.length; i++) {
                     //get rid of the cases where the value would mess up the totaldist calculation by adding 0
                     if (bmtlat[i] != 0 && bmtlat[i + 1] != 0 && bmtlong[i] != 0 && bmtlong[i + 1] != 0) {
                         //calculate the totaldist
                         totaldist = totaldist + bmtdist[i];
-                        //round the totaldist to 3 decimals to show km at meter accuracy
-
                     }
                 }
+                //round the totaldist to 3 decimals to show km at meter accuracy
                 finaldist = (double) Math.round(totaldist * 1000) / 1000 ;
+
+                //create an array that only contains date information of all data points
                 for (int i = 0; i < bmtlat.length; i++){
                     Location loc = coordinates.get(i);
                     bmttime[i] = new Date(loc.getTime());
                 }
 
-                //show the total distance in the textview
+                //create the 3 text views (distance, time and speed) to display to user
                 TextView distanceV = (TextView) findViewById(R.id.distance);
                 TextView timetakenV = (TextView) findViewById(R.id.timetaken);
                 TextView averagespeedV = (TextView) findViewById(R.id.averagespeed);
 
+                //temporary variables to make things easier to read
                 String seconds = new String(Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)));
                 Double roundnumber = new Double(finaldist/(Double.parseDouble(seconds)/3600));
 
-
+                //displays distance to user
                 String superfinaldistance = new String("Distance: " + finaldist + "km" );
+
+                //calculates total time taken. time is given in seconds,
+                //divide by 60 to get minutes, modulus 60 to get leftover seconds
                 String timetaken = new String ("Time: " + Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)/60) + "m " +
                         (Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)%60) + "s"));
 
-
+                //displays average speed, rounded to 1 decimal point
                 String finalaveragespeed = new String("Avg. Speed: " + (double)Math.round(roundnumber*10)/10 + "km/h");
 
-                Log.d("roudnnumeer", roundnumber.toString());
-                Log.d("averagespseed)", finalaveragespeed.toString());
-                Log.d("test", seconds.toString());
-                //Log.d("doubleparse", Double.parseDouble(seconds));
-
-
+                //set texts to textviews
                 distanceV.setText(superfinaldistance);
                 timetakenV.setText(timetaken);
                 averagespeedV.setText(finalaveragespeed);
@@ -275,7 +279,7 @@ public class MainActivity extends AppCompatActivity
                 positions[0] = getResources().getString(R.string.no_connection);
                 queryDialog(MainActivity.this, getResources().getString(R.string.info_prompt));
             }
-            myAdapter.notifyDataSetChanged();
+            //myAdapter.notifyDataSetChanged();
         }
 
         @Override
@@ -283,7 +287,7 @@ public class MainActivity extends AppCompatActivity
             // first clear the previous entries (if they exist)
             for (int i = 0; i < positions.length; i++)
                 positions[i] = "";
-            myAdapter.notifyDataSetChanged();
+            //myAdapter.notifyDataSetChanged();
         }
 
         @Override
@@ -294,8 +298,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Manipulates the map when it's available.
      * The API invokes this callback when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
+     * This is where we can add markers or lines, add listeners or move the camera.
      * If Google Play services is not installed on the device, the user receives a prompt to install
      * Play services inside the SupportMapFragment. The API invokes this method after the user has
      * installed Google Play services and returned to the app.
@@ -316,7 +319,7 @@ public class MainActivity extends AppCompatActivity
 
             //Clear all previous entries
             googleMap.clear();
-            //Add markers at end and start with titles
+            //Add markers at end and start with start/end titled that show up when clicked
             googleMap.addMarker(new MarkerOptions().position(start)).setTitle("Start"); ;
             googleMap.addMarker(new MarkerOptions().position(end)).setTitle("End");
             //Default zoom level of the map
@@ -328,9 +331,10 @@ public class MainActivity extends AppCompatActivity
             PolylineOptions line = new PolylineOptions().addAll(BMTmaplist).width(8).color(Color.RED);
             googleMap.addPolyline(line);
 
-
         }
     }
+    //calculating elapsed time between 2 timestamps
+    //input is 2 dates and timeunit in which result is returned in
     public static long getDateDiff(Date d1, Date d2, TimeUnit timeUnit) {
         long diffInMillies = d2.getTime() - d1.getTime();
         return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
