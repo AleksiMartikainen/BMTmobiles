@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity
         implements OnMapReadyCallback, View.OnClickListener {
 
-    private static final int MAXPOSITIONS = 60;
+    private static final int MAXPOSITIONS = 50;
     private static final String PREFERENCEID = "Credentials";
 
     private String username, password;
@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity
     private ArrayAdapter<String> myAdapter;
     private Double totaldist = 0d;
     private Double finaldist = 0d;
+    private Double x = 0d;
+    private Double y = 0d;
 
     private Button myButton;
 
@@ -224,8 +226,8 @@ public class MainActivity extends AppCompatActivity
                 }
                 for (int i = 0; i < bmtlat.length - 1; i++) { //instead of coordinates.size we use bmtlat.length
                     bmtdist[i] = //plane approximation formula to get the distance between two points
-                            Math.sqrt(Math.pow((40075d / 360d) * (bmtlat[i + 1] - bmtlat[i]), 2d)
-                                    + Math.pow((40075d / 360d) * Math.cos(bmtlat[i]) * (bmtlong[i + 1] - bmtlong[i]), 2d));
+                            Math.sqrt(Math.pow((40075d / 360d) * (bmtlat[i +1] - bmtlat[i]), 2d)
+                                    + Math.pow(((40075d * Math.cos(Math.toDegrees(bmtlat[i])))/360) * (bmtlong[i+1] - bmtlong[i]), 2d));
                 }
                 for (int i = 0; i < bmtdist.length; i++) {
                     //get rid of the cases where the value would mess up the totaldist calculation by adding 0
@@ -233,9 +235,10 @@ public class MainActivity extends AppCompatActivity
                         //calculate the totaldist
                         totaldist = totaldist + bmtdist[i];
                         //round the totaldist to 3 decimals to show km at meter accuracy
-                        finaldist = (double) Math.round(totaldist * 1000) / 1000 ;
+
                     }
                 }
+                finaldist = (double) Math.round(totaldist * 1000) / 1000 ;
                 for (int i = 0; i < bmtlat.length; i++){
                     Location loc = coordinates.get(i);
                     bmttime[i] = new Date(loc.getTime());
@@ -244,13 +247,8 @@ public class MainActivity extends AppCompatActivity
                 //show the total distance in the textview
                 TextView distance = (TextView) findViewById(R.id.distance);
                 //distance.setText("Distance: " + finaldist + "km");
-                distance.setText(Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)));
-                Log.d("0", bmttime[0].toString());
-                //Log.d("length", bmttime[bmttime.length].toString());
-                Log.d("length-1",bmttime[bmttime.length-1].toString());
-
-
-
+                String temp = new String("Dis: " + finaldist + "km" + " Tim: " + Long.toString(getDateDiff(bmttime[bmttime.length - 1], bmttime[0], TimeUnit.SECONDS)));
+                distance.setText(temp);
             } else {
                 // no, tell that to the user and ask a new username/password pair
                 positions[0] = getResources().getString(R.string.no_connection);
